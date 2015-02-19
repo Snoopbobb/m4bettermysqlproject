@@ -37,7 +37,7 @@ class Item {
 	/*********************************************************
 		method to return All Items as a template
 	*********************************************************/
-	public function getAllItems(){
+	public static function getAllItems(){
 		$sql = "
 		SELECT *
 		FROM item
@@ -69,7 +69,7 @@ class Item {
 	/*********************************************************
 			Method to update Items and return template
 	*********************************************************/
-	public function update(){
+	public static function editItem(){
 		if(isset($_GET['id'])){
 			if($_GET['id'] === "") {
 				header('Location: customers.php');
@@ -119,10 +119,39 @@ class Item {
 		return $template;
 	}
 
+
 	/*********************************************************
 		Method to return drop down options from Items table
 	*********************************************************/
-	public function getItemOptions(){
+	public function updateItem($name, $price, $id){
+		$sql = "
+			UPDATE item
+			SET name = :name, 
+				price = :price 
+			WHERE id = :id
+			";
+
+		$sql_values = [
+			':name' => $_POST['name'],
+			':price' => $_POST['price'],
+			':id' => $_GET['id']
+		];
+
+		// Make a PDO statement
+		$statement = DB::prepare($sql);
+
+		// Execute
+		DB::execute($statement, $sql_values);
+
+		// Redirect
+		header("Location: edit_item.php?id=$id");
+		exit();
+	}
+
+	/*********************************************************
+		Method to return drop down options from Items table
+	*********************************************************/
+	public static function getItemOptions(){
 		// Loop through items to populate drop down
 		$sql2 = "
 			SELECT * FROM item
@@ -139,6 +168,7 @@ class Item {
 
 		// Get all the results of the statement into an array
 		$results2 = $statement2->fetchAll();
+		$item = "";
 		foreach ($results2 as $heading2 => $row2) {
 			$item .= '<option value="' . $row2['id'] . '">' . $row2['name'] . '</option>';
 		}

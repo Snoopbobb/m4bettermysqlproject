@@ -1,5 +1,5 @@
 <?php 
-class Customer extends Manager {
+class Customer {
 
 	private $first_name;
 	private $last_name;
@@ -60,14 +60,15 @@ class Customer extends Manager {
 		DB::execute($statement2, $sql_values2);
 		// Redirect
 		header('Location: edit_customer.php?id=' . $customer_id);
+		return $mail_message;
 		exit();
 	
 	}
 
 	/***************************************************
 			Method to retrieve all customers
-	***************************************************/
-	public function getAll(){
+	****************************************************/
+	public static function getAll(){
 		$sql = "
 			SELECT *
 			FROM customer
@@ -101,7 +102,7 @@ class Customer extends Manager {
 	/***************************************************
 		Method to retrieve customer name by ID
 	***************************************************/
-	public function getCustomerNameByID($id){
+	public static function getCustomerNameByID($id){
 		$sql = "
 			SELECT CONCAT(c.first_name, ' ', c.last_name) AS customer_name
 			FROM customer AS c
@@ -123,7 +124,7 @@ class Customer extends Manager {
 	/****************************************************************
 		Method to update customer also creates form for new customer
 	*****************************************************************/
-	public function update(){
+	public static function editCustomer(){
 		// Initialize SQL statement and template for viewing and editing individual customer
 		if(isset($_GET['id'])){
 			if($_GET['id'] === "") {
@@ -157,7 +158,6 @@ class Customer extends Manager {
 
 			// Set up template for viewing 
 			$template = "
-			$message
 			<form method=\"POST\" action=\"update_customer.php?id=$id\">
 				<label>First Name</label>
 				<input type=\"text\" name=\"first_name\" value=\"$first_name\">
@@ -189,6 +189,40 @@ class Customer extends Manager {
 			</form>';
 		}
 		return $template;
+	}
+
+	/***************************************************
+			Method to update customer by ID
+	***************************************************/
+	public function updateCustomer($first_name, $last_name, $email, $gender, $id){
+		$id = $_GET['id'];
+
+		$sql = "
+			UPDATE customer
+			SET first_name = :first_name, 
+				last_name = :last_name, 
+				email = :email, 
+				gender = :gender
+			WHERE id = :id
+			";
+
+		$sql_values = [
+			':first_name' => $first_name,
+			':last_name' => $last_name,
+			':email' => $email,
+			':gender' => $gender,
+			':id' => $id
+		];
+
+		// Make a PDO statement
+		$statement = DB::prepare($sql);
+
+		// Execute
+		DB::execute($statement, $sql_values);
+
+		// Redirect
+		header("Location: edit_customer.php?id=$id");
+		exit();
 	}
 
 	/***************************************************

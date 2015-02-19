@@ -3,7 +3,7 @@
 require('Initialize/initialize.php');
 
 // call update method and return template
-$template = Item::update();
+$template = Item::editItem();
 ?>
 
 <!DOCTYPE html>

@@ -3,32 +3,21 @@
 // Initialize Code
 require('Initialize/initialize.php');
 
-$id = $_GET['id'];
-
-$sql = "
-	UPDATE item
-	SET name = :name, 
-		price = :price 
-	WHERE id = :id
-	";
-
-$sql_values = [
-	':name' => $_POST['name'],
-	':price' => $_POST['price'],
-	':id' => $_GET['id']
-];
-
-// Make a PDO statement
-$statement = DB::prepare($sql);
-
-// // Bind Parameters individually instead of using sql_values array
-// $statement->bindValue(':first_name', $_POST['first_name']);
-// $statement->bindValue(':last_name', $_POST['last_name']);
-// $statement->bindValue(':email', $_POST['email']);
-
-// Execute
-DB::execute($statement, $sql_values);
-
-// Redirect
-header("Location: edit_item.php?id=$id");
-exit();
+// Validate Price
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+	if(isset($_POST['price']) && $_POST['price']) {
+		$price = $_POST['price'];
+		$validateNumber = new numberValidate;
+		if(!$validateNumber->isValid($price)) {
+			$message = "'$price' is not a valid number. Only numbers are allowed.";
+			echo "<h3 style=\"color:red;\">$message</h3>";
+			exit();	
+		}
+	} else {
+		$message = "Price must not be empty.";
+		echo "<h3 style=\"color:red;\">$message</h3>";
+		exit();
+	}
+	// call method to update item
+	Item::updateItem($_POST['name'], $_POST['price'], $_GET['id']);
+} 

@@ -2,5 +2,9 @@
 // Initialize Code
 require('Initialize/initialize.php');
 
-// call deleteByID method
-Item::deleteByID($_GET['id']);
+if (isset($_GET['id'])) {
+	// call deleteByID method
+	Item::deleteByID($_GET['id']);
+} else {
+	header('Location: items.php');
+}

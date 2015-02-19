@@ -1,38 +1,23 @@
 <?php
+// Validate Email
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+	if(isset($_POST['email']) && $_POST['email']) {
+		$email = $_POST['email'];
+		$emailValidate = new emailValidate;
+		if(!$emailValidate->isValid($email)) {
+			$message = "'$email' is not a valid email address. Please enter a valid email address.";
+			$email = '';
+			echo "<h3 style=\"color: red;\">$message</h3>";
+			exit();
+		} 
+	} else {
+		$message = "Email must not be empty.";
+		echo "<h3 style=\"color: red;\">$message</h3>";
+		exit();
+	}
+	// Initialize Code
+	require('Initialize/initialize.php');
 
-// Initialize Code
-require('Initialize/initialize.php');
-
-$id = $_GET['id'];
-
-$sql = "
-	UPDATE customer
-	SET first_name = :first_name, 
-		last_name = :last_name, 
-		email = :email, 
-		gender = :gender
-	WHERE id = :id
-	";
-
-$sql_values = [
-	':first_name' => $_POST['first_name'],
-	':last_name' => $_POST['last_name'],
-	':email' => $_POST['email'],
-	':gender' => $_POST['gender'],
-	':id' => $_GET['id']
-];
-
-// Make a PDO statement
-$statement = DB::prepare($sql);
-
-// // Bind Parameters individually instead of using sql_values array
-// $statement->bindValue(':first_name', $_POST['first_name']);
-// $statement->bindValue(':last_name', $_POST['last_name']);
-// $statement->bindValue(':email', $_POST['email']);
-
-// Execute
-DB::execute($statement, $sql_values);
-
-// Redirect
-header("Location: edit_customer.php?id=$id");
-exit();
+	// call method to update customer
+	Customer::updateCustomer($_POST['first_name'], $_POST['last_name'], $_POST['email'], $_POST['gender'], $_GET['id']);
+}

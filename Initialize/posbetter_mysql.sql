@@ -73,9 +73,6 @@ INSERT INTO customer (first_name, last_name, email, gender, customer_since)
 INSERT INTO customer (first_name, last_name, email, gender, customer_since)
     VALUES ('don', 'draper', 'mowomen@motroubles.com', 'male', CURDATE());
 
-INSERT INTO customer (first_name, last_name, email, gender, customer_since)
-    VALUES ('lindsey', 'lohan', '2ndhome@rehab.com', 'female', CURDATE());
-
 INSERT INTO item (name, price) VALUES ('draft beer', 4.00);
 
 INSERT INTO item (name, price) VALUES ('jack daniels', 6.00);
@@ -115,8 +112,6 @@ INSERT INTO invoice (customer_id, created_at) VALUES (8, NOW());
 INSERT INTO invoice (customer_id, created_at) VALUES (9, NOW());
 
 INSERT INTO invoice (customer_id, created_at) VALUES (10, NOW());
-
-INSERT INTO invoice (customer_id, created_at) VALUES (11, NOW());
 
 INSERT INTO invoice_item (invoice_id, item_id, quantity) VALUES (1, 1, 24);
 
@@ -169,15 +164,3 @@ INSERT INTO invoice_item (invoice_id, item_id, quantity) VALUES (10, 9, 2);
 INSERT INTO invoice_item (invoice_id, item_id, quantity) VALUES (10, 2, 6);
 
 INSERT INTO invoice_item (invoice_id, item_id, quantity) VALUES (10, 6, 8);
-
-INSERT INTO invoice_item (invoice_id, item_id, quantity) VALUES (11, 2, 9);
-
-INSERT INTO invoice_item (invoice_id, item_id, quantity) VALUES (11, 5, 12);
-
-INSERT INTO invoice_item (invoice_id, item_id, quantity) VALUES (11, 4, 7);
-
-INSERT INTO invoice_item (invoice_id, item_id, quantity) VALUES (11, 9, 11);
-
-INSERT INTO invoice_item (invoice_id, item_id, quantity) VALUES (11, 7, 9);
-
-INSERT INTO invoice_item (invoice_id, item_id, quantity) VALUES (11, 10, 2);

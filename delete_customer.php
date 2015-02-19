@@ -2,7 +2,16 @@
 // Initialize Code
 require('Initialize/initialize.php');
 
-Customer::deleteByID($_GET['id']);
+If(isset($_GET['id'])){
+	// Call method delete by ID
+	Customer::deleteByID($_GET['id']);
 
-header("Location: customers.php");
-exit();
+	// Redirect to customers page
+	header("Location: customers.php");
+	exit();
+	
+} else {
+	// Redirect to customers page
+	header("Location: customers.php");
+	exit();
+}

@@ -2,7 +2,7 @@
 require('Initialize/initialize.php');
 
 // call update method
-$template = Customer::update();
+$template = Customer::editCustomer();
 
 ?>
 

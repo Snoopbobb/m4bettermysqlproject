@@ -13,6 +13,7 @@ class Invoice {
 		$this->quantity = $quantity;
 
 		$id = $this->invoice_id;
+
 		$sql = "
 			INSERT INTO invoice_item (
 				invoice_id, item_id, quantity
@@ -36,13 +37,15 @@ class Invoice {
 		// Redirect
 		header('Location: invoice_details.php?id=' . $id);
 		exit();
+
+		return $message;
 	}
 
 
 	/*********************************************************
 			Method to retrieve Invoice Item details
 	*********************************************************/
-	public function getInvoiceDetails($id){
+	public static function getInvoiceDetails($id){
 		$sql = "
 			SELECT quantity, i.name, price, (price * quantity) AS subtotal, t.id AS invoice_item_id
 			FROM invoice_item AS t, invoice AS v, item AS i
@@ -50,6 +53,14 @@ class Invoice {
 			AND i.id = t.item_id
 			AND v.id = $id
 			";
+
+		// $sql = "
+		// 	SELECT quantity, item.name, price, (price * quantity) AS subtotal
+		// 	FROM item
+		// 	JOIN invoice_item ON (invoice_item.item_id = item.id)
+		// 	JOIN invoice ON (invoice_item.invoice_id = invoice.id)
+		// 	WHERE invoice.id = invoice_item.invoice_id AND invoice_item.item_id = item.id
+		// ";
 
 		$prepare_values = [
 			':id' => $id
@@ -84,13 +95,14 @@ class Invoice {
 	/***************************************************
 				Method to return all Invoices
 	***************************************************/
-	public function getAllInvoices(){
+	public static function getAllInvoices(){
 		$sql = "
-			SELECT v.id, CONCAT(first_name, ' ', last_name) AS name, (quantity * price) AS total
+			SELECT v.id, CONCAT(first_name, ' ', last_name) AS name, SUM(quantity * price) AS total
 			FROM customer AS c, invoice AS v, invoice_item AS t, item as i 
 			WHERE c.id = v.customer_id
 			AND v.id = t.invoice_id
 			AND i.id = t.item_id
+			Group by t.invoice_id
 			";
 
 		// Make a PDO statement
@@ -119,7 +131,7 @@ class Invoice {
 	/***************************************************
 			Method to delete Invoice Items By Id
 	***************************************************/
-	public function deleteByID($id){
+	public static function deleteByID($id){
 		// Get invoice id for redirect
 		$sql2 = "
 			SELECT invoice_id
@@ -160,7 +172,7 @@ class Invoice {
 	/***************************************************
 		Method to find total of item details by id
 	***************************************************/
-	public function getTotal($id){
+	public static function getTotal($id){
 		$total[] = 0;
 		$sql = "
 			SELECT (price * quantity) AS subtotal

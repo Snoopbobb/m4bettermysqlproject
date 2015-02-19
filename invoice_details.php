@@ -2,20 +2,20 @@
 // Initialize files
 require('Initialize/initialize.php');
 
-// Set $id
+//initialize id
 $id = $_GET['id'];
 
-// Call method to get customer's full name
+//call method to retrieve customer name
 $customer = Customer::getCustomerNameByID($id);
 
-// Get template
-$template = Invoice::getInvoiceDetails($id);
+// Call method to retrieve invoice details
+$template = Invoice::getInvoiceDetails($id); 
 
-// Get drop down options
-$item = Item::getItemOptions();
-
-// Get invoice_items total
+// call method to retrieve sum
 $sum = Invoice::getTotal($id);
+
+// call method to populate dropdown menu
+$item = Item::getItemOptions();
 ?>
 
 <!DOCTYPE html>
@@ -44,7 +44,7 @@ $sum = Invoice::getTotal($id);
 	</table>
 	<form action="new_invoice.php?id=<?php echo $id; ?>" method="POST">
 		<label>QTY</label>
-		<input type="text" name="quantity">
+		<input type="text" name="quantity" value="">
 		<label>Item</label>
 		<select name="item_id">
 			<?php echo $item; ?>

@@ -2,5 +2,9 @@
 // Initialize Code
 require('Initialize/initialize.php');
 
-// Call deleteByID method from Invoice
-Invoice::deleteByID($_GET['id']);
+if (isset($_GET['id'])){
+	// Call deleteByID method from Invoice
+	Invoice::deleteByID($_GET['id']);
+} else {
+	header('Location: invoices.php');
+}
