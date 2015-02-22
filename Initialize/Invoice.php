@@ -20,6 +20,8 @@ class Invoice {
 			) VALUES (
 				:invoice_id, :item_id, :quantity
 			)
+			ON DUPLICATE KEY UPDATE
+			quantity = :quantity
 			";
 
 		$sql_values = [
@@ -33,71 +35,14 @@ class Invoice {
 
 		// Execute
 		DB::execute($statement, $sql_values);
-
-		// Redirect
-		header('Location: invoice_details.php?id=' . $id);
-		exit();
-
-		return $message;
-	}
-
-
-	/*********************************************************
-			Method to retrieve Invoice Item details
-	*********************************************************/
-	public static function getInvoiceDetails($id){
-		$sql = "
-			SELECT quantity, i.name, price, (price * quantity) AS subtotal, t.id AS invoice_item_id
-			FROM invoice_item AS t, invoice AS v, item AS i
-			WHERE v.id = t.invoice_id
-			AND i.id = t.item_id
-			AND v.id = $id
-			";
-
-		// $sql = "
-		// 	SELECT quantity, item.name, price, (price * quantity) AS subtotal
-		// 	FROM item
-		// 	JOIN invoice_item ON (invoice_item.item_id = item.id)
-		// 	JOIN invoice ON (invoice_item.invoice_id = invoice.id)
-		// 	WHERE invoice.id = invoice_item.invoice_id AND invoice_item.item_id = item.id
-		// ";
-
-		$prepare_values = [
-			':id' => $id
-			];
-
-		// Make a PDO statement
-		$statement = DB::prepare($sql);
-
-		// Execute
-		DB::execute($statement);
-
-		// Get all the results of the statement into an array
-		$results = $statement->fetchAll();
-
-		// Loop array to get each row
-		$total = [];
-		$template = '';
-		foreach ($results as $heading => $row) {
-			$invoice_item_id = $row['invoice_item_id'];
-			$template .=
-					'<tr>
-						<td>' . $row['quantity']  . '</td>
-						<td>' . $row['name']  . '</td>
-						<td>' . $row['price']  . '</td>
-						<td>' . $row['subtotal'] . '</td>
-						<td>' . '<a href="delete_invoice.php?id=' . $invoice_item_id . '">Remove</a></td>
-					</tr>';
-		}
-		return $template;
 	}
 
 	/***************************************************
-				Method to return all Invoices
+		Method to return all Invoices (not details)
 	***************************************************/
 	public static function getAllInvoices(){
 		$sql = "
-			SELECT v.id, CONCAT(first_name, ' ', last_name) AS name, SUM(quantity * price) AS total
+			SELECT v.id, CONCAT(first_name, ' ', last_name) AS name, SUM(quantity * price) AS subtotal
 			FROM customer AS c, invoice AS v, invoice_item AS t, item as i 
 			WHERE c.id = v.customer_id
 			AND v.id = t.invoice_id
@@ -113,87 +58,118 @@ class Invoice {
 
 		// Get all the results of the statement into an array
 		$results = $statement->fetchAll();
-
-		// Loop array to get each row
-		$template = '';
-		foreach ($results as $heading => $row) {
-			$template .=
-					'<tr>
-						<td>' . $row['id']  . '</td>
-						<td>' . $row['name']  . '</td>
-						<td>' . $row['total'] . '</td>
-						<td>' . '<a href="invoice_details.php?id=' . $row['id'] . '">Details</a></td>
-					</tr>';
-		}
-		return $template;
+	
+		return $results;
 	}
 
-	/***************************************************
-			Method to delete Invoice Items By Id
-	***************************************************/
-	public static function deleteByID($id){
-		// Get invoice id for redirect
-		$sql2 = "
-			SELECT invoice_id
-			FROM invoice_item
-			WHERE id = $id 
-			";
-
-		// Make a PDO statement
-		$statement2 = DB::prepare($sql2);
-
-		// Execute
-		DB::execute($statement2);
-
-		// Get all the results of the statement into an array
-		$results = $statement2->fetchAll();
-		foreach ($results as $row) {
-			$invoice_detail_id = $row['invoice_id'];
-		}
-		
-		// delete invoice item detail
+	/*********************************************************
+			Method to retrieve Invoice Item details
+	*********************************************************/
+	public static function getInvoiceDetails($id){
 		$sql = "
-			DELETE 
-			FROM invoice_item
-			WHERE id = $id 
+			SELECT quantity, i.name, price, (price * quantity) AS subtotal, t.invoice_id, t.item_id
+			FROM invoice_item AS t, invoice AS v, item AS i
+			WHERE v.id = t.invoice_id
+			AND i.id = t.item_id
+			AND v.id = :id
 			";
+
+		// $sql = "
+		// 	SELECT quantity, item.name, price, (price * quantity) AS subtotal
+		// 	FROM item
+		// 	JOIN invoice_item ON (invoice_item.item_id = item.id)
+		// 	JOIN invoice ON (invoice_item.invoice_id = invoice.id)
+		// 	WHERE invoice.id = invoice_item.invoice_id AND invoice_item.item_id = item.id
+		// ";
+
+		$sql_values = [
+			':id' => $id
+			];
 
 		// Make a PDO statement
 		$statement = DB::prepare($sql);
 
 		// Execute
-		DB::execute($statement);
+		DB::execute($statement, $sql_values);
 
-		 // Redirect to invoice details page
-		header("Location: invoice_details.php?id=" . $invoice_detail_id);
-		exit();
+		// Get all the results of the statement into an array
+		$results = $statement->fetchAll();
+		
+		return $results;
+	}
+
+
+	/***************************************************
+			Method to delete Invoice Items By Id
+	***************************************************/
+	public static function deleteByID($invoice_id, $item_id){
+		// Get invoice id for redirect
+		$sql = "
+			SELECT invoice_id
+			FROM invoice_item
+			WHERE invoice_id = :invoice_id 
+			";
+
+		$sql_values = [
+			':invoice_id' => $invoice_id
+			];
+
+		// Make a PDO statement
+		$statement = DB::prepare($sql);
+
+		// Execute
+		DB::execute($statement, $sql_values);
+
+		// Get all the results of the statement into an array
+		$results = $statement->fetch();
+		
+		// delete invoice item detail
+		$sql2 = "
+			DELETE 
+			FROM invoice_item
+			WHERE (invoice_id, item_id) IN ((:invoice_id, :item_id))
+			";
+
+		$sql_values2 = [
+			':invoice_id' => $invoice_id,
+			':item_id' => $item_id
+			];
+
+		// Make a PDO statement
+		$statement2 = DB::prepare($sql2);
+
+		// Execute
+		DB::execute($statement2, $sql_values2);
+
+		return $results;
 	}
 
 	/***************************************************
 		Method to find total of item details by id
 	***************************************************/
 	public static function getTotal($id){
-		$total[] = 0;
 		$sql = "
 			SELECT (price * quantity) AS subtotal
 			FROM invoice_item AS t, invoice AS v, item AS i
 			WHERE v.id = t.invoice_id
 			AND i.id = t.item_id
-			AND v.id = $id
+			AND v.id = :id
 			";
+
+		$sql_values = [
+			':id' => $id
+			];
 
 		// Make a PDO statement
 		$statement = DB::prepare($sql);
 
 		// Execute
-		DB::execute($statement);
+		DB::execute($statement, $sql_values);
 
-		// Get all the results of the statement into an array
+		// Get results
 		$results = $statement->fetchAll();
-		foreach ($results as $row){
-			$total[] .= $row['subtotal'];
-		}
-		$sum = array_sum($total);
-		return $sum;
+
+		// return results
+		return $results;
 	}
 }

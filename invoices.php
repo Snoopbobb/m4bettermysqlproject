@@ -3,7 +3,21 @@
 require('Initialize/initialize.php');
 
 // Call method to retrieve all invoices
-$template = Invoice::getAllInvoices(); 
+$results = Invoice::getAllInvoices(); 
+
+// Loop array to get each row
+$template = '';
+$total = "";
+foreach ($results as $row) {
+	$template .=
+		'<tr>
+			<td>' . $row['id']  . '</td>
+			<td>' . ucwords($row['name'])  . '</td>
+			<td>' . $row['subtotal'] . '</td>
+			<td>' . '<a href="invoice_details.php?id=' . $row['id'] . '">Details</a></td>
+		</tr>';
+	$total += $row['subtotal'];
+	}
 ?>
 
 <!DOCTYPE html>
@@ -22,6 +36,11 @@ $template = Invoice::getAllInvoices();
 			<th>Sub-Total</th>
 		</tr>
 			<?php echo $template; ?>
+		<tr>
+			<td></td>
+			<th>Total</th>
+			<td><?php echo "$" . number_format($total, 2); ?></td>
+		</tr>
 	</table>
 </body>
 </html>

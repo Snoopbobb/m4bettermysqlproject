@@ -6,16 +6,48 @@ require('Initialize/initialize.php');
 $id = $_GET['id'];
 
 //call method to retrieve customer name
-$customer = Customer::getCustomerNameByID($id);
+$customerName = Customer::getCustomerNameByID($id);
+
+// convert customer from array to string
+$customer = $customerName['customer_name'];
 
 // Call method to retrieve invoice details
-$template = Invoice::getInvoiceDetails($id); 
+$invoiceDetails = Invoice::getInvoiceDetails($id);
 
-// call method to retrieve sum
-$sum = Invoice::getTotal($id);
+// Loop over invoice details and set up template
+$total = [];
+$template = '';
+foreach ($invoiceDetails as $row) {
+	$invoice_id = $row['invoice_id'];
+	$item_id = $row['item_id'];
+	$template .=
+		'<tr>
+			<td>' . $row['quantity']  . '</td>
+			<td>' . $row['name']  . '</td>
+			<td>' . $row['price']  . '</td>
+			<td>' . $row['subtotal'] . '</td>
+			<td>' . '<a href="delete_invoice.php?invoice_id=' . $invoice_id . '&item_id=' . $item_id . '">Remove</a></td>
+		</tr>';
+}
 
-// call method to populate dropdown menu
-$item = Item::getItemOptions();
+// call method to retrieve total
+$getTotalResults = Invoice::getTotal($id);
+
+$subTotal = [];
+// Take getTotal results and pull out invoice id and subtotal
+foreach ($getTotalResults as $row) {
+	$subTotal[] .= $row['subtotal'];
+}
+// Find sum of invoice detail items
+$sum = array_sum($subTotal);
+
+// get all items and create dropdown list
+$getItems = Item::getItems();
+
+$options = "";
+		foreach ($getItems as $row) {
+			$options .= '<option value="' . $row['id'] . '">' . $row['name'] . '</option>';
+		}
 ?>
 
 <!DOCTYPE html>
@@ -47,7 +79,7 @@ $item = Item::getItemOptions();
 		<input type="text" name="quantity" value="">
 		<label>Item</label>
 		<select name="item_id">
-			<?php echo $item; ?>
+			<?php echo $options; ?>
 		</select>
 		<button>Add</button>
 	</form>

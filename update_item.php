@@ -20,4 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	}
 	// call method to update item
 	Item::updateItem($_POST['name'], $_POST['price'], $_GET['id']);
+
+	// redirect to edti item page
+	header('Location: items.php');
 } 

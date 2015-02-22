@@ -20,3 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	// Create new invoice detail
 	new Invoice($_GET['id'], $_POST['item_id'], $_POST['quantity']);
 }
+
+// Redirect
+header('Location: invoice_details.php?id=' . $_GET['id']);
+exit();

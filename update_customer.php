@@ -1,4 +1,5 @@
 <?php
+require('Initialize/initialize.php');
 // Validate Email
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	if(isset($_POST['email']) && $_POST['email']) {
@@ -21,3 +22,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	// call method to update customer
 	Customer::updateCustomer($_POST['first_name'], $_POST['last_name'], $_POST['email'], $_POST['gender'], $_GET['id']);
 }
+// Redirect
+		header("Location: customers.php");
+		exit();

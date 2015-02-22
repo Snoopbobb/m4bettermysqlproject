@@ -19,5 +19,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		exit();
 	}
 	//  Create new customer
-	new Customer($_POST['first_name'], $_POST['last_name'], $_POST['email'], $_POST['gender']);
+	Customer::create($_POST['first_name'], $_POST['last_name'], $_POST['email'], $_POST['gender']);
+	
+	// Redirect
+	header('Location: edit_customer.php?id=' . $customer_id);
+	exit();
 }

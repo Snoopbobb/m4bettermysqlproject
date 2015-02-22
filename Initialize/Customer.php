@@ -1,21 +1,26 @@
 <?php 
 class Customer {
 
-	private $first_name;
-	private $last_name;
-	private $email;
-	private $gender;
-	private $customer_since;
+	public $id;
+	public $first_name;
+	public $last_name;
+	public $email;
+	public $gender;
+	public $customer_since;
 
 	/***************************************************
 		Constructor method to create new customer
 	***************************************************/
-	public function __construct($first_name, $last_name, $email, $gender) {
+	public function __construct($id, $first_name, $last_name, $email, $gender, $customer_since) {
+		$this->id = $id;
 		$this->first_name = $first_name;
 		$this->last_name = $last_name;
 		$this->email = $email;
 		$this->gender = $gender;
+		$this->customer_since = $customer_since;
+	}
 
+	public static function create($first_name, $last_name, $email, $gender){
 		// Insert new customer data
 		$sql = "
 			INSERT INTO customer (
@@ -26,10 +31,10 @@ class Customer {
 			";
 
 		$sql_values = [
-			':first_name' => $this->first_name,
-			':last_name' => $this->last_name,
-			':email' => $this->email,
-			':gender' => $this->gender,
+			':first_name' => $first_name,
+			':last_name' => $last_name,
+			':email' => $email,
+			':gender' => $gender,
 		];
 
 		// Make a PDO statement
@@ -57,18 +62,13 @@ class Customer {
 		$statement2 = DB::prepare($sql2);
 
 		// Execute
-		DB::execute($statement2, $sql_values2);
-		// Redirect
-		header('Location: edit_customer.php?id=' . $customer_id);
-		return $mail_message;
-		exit();
-	
+		DB::execute($statement2, $sql_values2);	
 	}
 
 	/***************************************************
 			Method to retrieve all customers
 	****************************************************/
-	public static function getAll(){
+	public static function getCustomers(){
 		$sql = "
 			SELECT *
 			FROM customer
@@ -83,20 +83,11 @@ class Customer {
 		// Get all the results of the statement into an array
 		$results = $statement->fetchAll();
 
-		// Loop array to get each row
-		$template = '';
-		foreach ($results as $heading => $row) {
-			$template .=
-					'<tr>
-						<td>' . ucfirst($row['first_name'])  . '</td>
-						<td>' . ucfirst($row['last_name']) . '</td>
-						<td>' . $row['email'] . '</td>
-						<td>' . '<a href="invoice_details.php?id=' . $row['id'] . '">New Invoice</a></td>
-						<td>' . '<a href="edit_customer.php?id=' . $row['id'] . '">Edit</a></td>
-						<td>' . '<a href="delete_customer.php?id=' . $row['id'] . '">Remove</a></td>
-					</tr>';
+		$customers = [];
+		foreach($results as $row) {
+			$customers[]= new Customer($row['id'], $row['first_name'], $row['last_name'], $row['email'], $row['gender'], $row['customer_since']);
 		}
-		return $template;
+		return $customers;
 	}
 
 	/***************************************************
@@ -106,97 +97,56 @@ class Customer {
 		$sql = "
 			SELECT CONCAT(c.first_name, ' ', c.last_name) AS customer_name
 			FROM customer AS c
-			WHERE id = $id
+			WHERE id = :id
 			";
+
+		$sql_values = [
+			':id' => $id
+		];
 
 		// Make a PDO statement
 		$statement = DB::prepare($sql);
 
 		// Execute
-		DB::execute($statement);
+		DB::execute($statement, $sql_values);
 
 		// Get all the results of the statement into an array
-		$results = $statement->fetchAll();
+		$results = $statement->fetch();
 
-		return $results[0]['customer_name'];
+		return $results;
 	}
 
 	/****************************************************************
-		Method to update customer also creates form for new customer
+					Method to get customer by id
 	*****************************************************************/
-	public static function editCustomer(){
-		// Initialize SQL statement and template for viewing and editing individual customer
-		if(isset($_GET['id'])){
-			if($_GET['id'] === "") {
-				header('Location: customers.php');
-			} 
-			$sql = "
-				SELECT *
-				FROM customer
-				WHERE id = :id
-				";
+	public static function getCustomerByID($id){
+		// Initialize SQL statement to edit individual customer
+		$sql = "
+			SELECT *
+			FROM customer
+			WHERE id = :id
+			";
 
-			$prepare_values = [
-				':id' => $_GET['id']
-				];
+		$sql_values = [
+			':id' => $id
+			];
 
-			// Make a PDO statement
-			$statement = DB::prepare($sql);
+		// Make a PDO statement
+		$statement = DB::prepare($sql);
 
-			// Execute
-			DB::execute($statement, $prepare_values);
+		// Execute
+		DB::execute($statement, $sql_values);
 
-			// Get all the results of the statement into an array
-			$results = $statement->fetchAll();
-
-			// Get the first result as a row
-			$row = $results[0];
-			$first_name = $row['first_name'];
-			$last_name = $row['last_name'];
-			$email = $row['email'];
-			$id = $row['id'];
-
-			// Set up template for viewing 
-			$template = "
-			<form method=\"POST\" action=\"update_customer.php?id=$id\">
-				<label>First Name</label>
-				<input type=\"text\" name=\"first_name\" value=\"$first_name\">
-				<label>Last Name</label>
-				<input type=\"text\" name=\"last_name\" value=\"$last_name\">
-				<label>Email Name</label>
-				<input type=\"email\" name=\"email\" value=\"$email\">
-				<select name=\"gender\">
-					<option value=\"male\">Male</option>
-					<option value=\"female\">Female</option>
-				</select>
-				<button>Update</button>
-			</form>";
-		} else  {
-			// This will initialize template for new customer
-			$template = '
-			<form method="POST" action="new_customer.php">
-				<label>First Name</label>
-				<input type="text" name="first_name" value="">
-				<label>Last Name</label>
-				<input type="text" name="last_name" value="">
-				<label>Email Name</label>
-				<input type="email" name="email" value="">
-				<select name="gender">
-					<option value="male">Male</option>
-					<option value="female">Female</option>
-				</select>
-				<button>ADD</button>
-			</form>';
-		}
-		return $template;
+		// Get all the results of the statement into an array
+		$results = $statement->fetch();
+		return $results;
 	}
 
 	/***************************************************
 			Method to update customer by ID
 	***************************************************/
 	public function updateCustomer($first_name, $last_name, $email, $gender, $id){
-		$id = $_GET['id'];
-
+	
 		$sql = "
 			UPDATE customer
 			SET first_name = :first_name, 
@@ -219,10 +169,6 @@ class Customer {
 
 		// Execute
 		DB::execute($statement, $sql_values);
-
-		// Redirect
-		header("Location: edit_customer.php?id=$id");
-		exit();
 	}
 
 	/***************************************************

@@ -1,8 +1,60 @@
 <?php 
 require('Initialize/initialize.php');
 
-// call update method
-$template = Customer::editCustomer();
+if(isset($_GET['id'])){
+	if($_GET['id'] === "") {
+		header('Location: customers.php');
+	} 
+
+	// call update method
+	$customer = Customer::getCustomerByID($_GET['id']);
+
+	// Get the first result as a row
+	$first_name = $customer['first_name'];
+	$last_name = $customer['last_name'];
+	$email = $customer['email'];
+	$id = $customer['id'];
+
+	$selected1 = "";
+	$selected2 = "";
+	if($customer['gender'] === 'male'){
+		$selected1 = 'selected';
+	} else {
+		$selected2 = 'selected';
+	}
+
+	// Set up template for viewing 
+	$template = "
+	<form method=\"POST\" action=\"update_customer.php?id=$id\">
+		<label>First Name</label>
+		<input type=\"text\" name=\"first_name\" value=\"$first_name\">
+		<label>Last Name</label>
+		<input type=\"text\" name=\"last_name\" value=\"$last_name\">
+		<label>Email Name</label>
+		<input type=\"email\" name=\"email\" value=\"$email\">
+		<select name=\"gender\">
+			<option value=\"male\" $selected1>Male</option>
+			<option value=\"female\" $selected2>Female</option>
+		</select>
+		<button>Update</button>
+	</form>";
+} else  {
+	// This will initialize template for new customer
+	$template = '
+	<form method="POST" action="new_customer.php">
+		<label>First Name</label>
+		<input type="text" name="first_name" value="">
+		<label>Last Name</label>
+		<input type="text" name="last_name" value="">
+		<label>Email Name</label>
+		<input type="email" name="email" value="">
+		<select name="gender">
+			<option value="male">Male</option>
+			<option value="female">Female</option>
+		</select>
+		<button>ADD</button>
+	</form>';
+}
 
 ?>
 

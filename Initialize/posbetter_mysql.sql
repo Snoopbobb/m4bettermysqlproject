@@ -33,7 +33,7 @@ CREATE TABLE invoice (
 );
 
 CREATE TABLE invoice_item (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    PRIMARY KEY (invoice_id, item_id),
     invoice_id INT NOT NULL,
     item_id INT NOT NULL,
     quantity INT
