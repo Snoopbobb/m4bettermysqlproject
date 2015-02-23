@@ -1,20 +1,37 @@
 <?php 
 require('Initialize/initialize.php');
 
+// make sure get id is set
 if(isset($_GET['id'])){
+	// make sure get id is not empty
 	if($_GET['id'] === "") {
 		header('Location: customers.php');
 	} 
 
-	// call update method
-	$customer = Customer::getCustomerByID($_GET['id']);
+	//initialize id
+	$id = $_GET['id'];
 
-	// Get the first result as a row
+	// make sure get id is a number
+	$validateNumber = new numberValidate;
+	if(!$validateNumber->isValid($id)) {
+		header('Location: customers.php');
+		exit();	
+	}
+
+	// call update method
+	$customer = Customer::getCustomerByID($id);
+	
+	// make sure customer returned has value
+	if($customer == NULL){
+		header('Location: customers.php');
+		exit();
+	}
+
+	// setup variables for template
 	$first_name = $customer['first_name'];
 	$last_name = $customer['last_name'];
 	$email = $customer['email'];
 	$id = $customer['id'];
-
 	$selected1 = "";
 	$selected2 = "";
 	if($customer['gender'] === 'male'){
@@ -22,6 +39,7 @@ if(isset($_GET['id'])){
 	} else {
 		$selected2 = 'selected';
 	}
+
 
 	// Set up template for viewing 
 	$template = "

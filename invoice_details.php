@@ -2,22 +2,43 @@
 // Initialize files
 require('Initialize/initialize.php');
 
-//initialize id
-$id = $_GET['id'];
+// make sure using get
+if(isset($_GET['id'])){
+		// makes sure get isn't blank
+		if($_GET['id'] === "") {
+			header('Location: invoices.php');
+			exit();
+		}
+	//initialize id
+	$id = $_GET['id'];
 
-//call method to retrieve customer name
-$customerName = Customer::getCustomerNameByID($id);
+	// make sure get id is a number
+	$validateNumber = new numberValidate;
+	if(!$validateNumber->isValid($id)) {
+		header('Location: invoices.php');
+		exit();	
+	}
 
-// convert customer from array to string
-$customer = $customerName['customer_name'];
 
-// Call method to retrieve invoice details
-$invoiceDetails = Invoice::getInvoiceDetails($id);
+	//call method to retrieve customer name
+	$customerName = Customer::getCustomerNameByID($id);
 
-// Loop over invoice details and set up template
-$total = [];
-$template = '';
-foreach ($invoiceDetails as $row) {
+	// convert customer from array to string
+	$customer = $customerName['customer_name'];
+
+	// Call method to retrieve invoice details
+	$invoiceDetails = Invoice::getInvoiceDetails($id);
+
+	// make sure customer returned has value
+	if($customer == NULL){
+		header('Location: invoices.php');
+		exit();
+	}
+
+	// Loop over invoice details and set up template
+	$total = [];
+	$template = '';
+	foreach ($invoiceDetails as $row) {
 	$invoice_id = $row['invoice_id'];
 	$item_id = $row['item_id'];
 	$template .=
@@ -28,26 +49,30 @@ foreach ($invoiceDetails as $row) {
 			<td>' . $row['subtotal'] . '</td>
 			<td>' . '<a href="delete_invoice.php?invoice_id=' . $invoice_id . '&item_id=' . $item_id . '">Remove</a></td>
 		</tr>';
-}
+	}
 
-// call method to retrieve total
-$getTotalResults = Invoice::getTotal($id);
+	// call method to retrieve total
+	$getTotalResults = Invoice::getTotal($id);
 
-$subTotal = [];
-// Take getTotal results and pull out invoice id and subtotal
-foreach ($getTotalResults as $row) {
+	$subTotal = [];
+	// Take getTotal results and pull out invoice id and subtotal
+	foreach ($getTotalResults as $row) {
 	$subTotal[] .= $row['subtotal'];
-}
-// Find sum of invoice detail items
-$sum = array_sum($subTotal);
+	}
+	// Find sum of invoice detail items
+	$sum = array_sum($subTotal);
 
-// get all items and create dropdown list
-$getItems = Item::getItems();
+	// get all items and create dropdown list
+	$getItems = Item::getItems();
 
-$options = "";
+	$options = "";
 		foreach ($getItems as $row) {
 			$options .= '<option value="' . $row['id'] . '">' . $row['name'] . '</option>';
 		}
+} else {
+	header('Location: invoices.php');
+	exit();
+}
 ?>
 
 <!DOCTYPE html>

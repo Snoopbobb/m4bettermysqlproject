@@ -7,8 +7,7 @@ class Item {
 	/*********************************************************
 		Constructor method to create new Item
 	*********************************************************/
-	public function __construct($id, $name, $price) {
-		$this->id = $id;
+	public function __construct($name, $price) {
 		$this->name = $name;
 		$this->price = $price;
 	}
@@ -79,7 +78,7 @@ class Item {
 		// Get all the results of the statement into an array
 		$result = $statement->fetch();
 
-		return new Item($id, $result['name'], $result['price']);
+		return $result;
 	}
 
 	/*********************************************************
@@ -88,8 +87,7 @@ class Item {
 	public static function updateItem($id){
 		$sql = "
 	 		UPDATE item
-			SET name = :name, 
-	 		price = :price 
+			SET name = :name, price = :price 
 	 		WHERE id = :id
 	 		";
 

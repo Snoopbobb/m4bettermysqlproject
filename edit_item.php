@@ -5,13 +5,31 @@ require('Initialize/initialize.php');
 	if(isset($_GET['id'])){
 		if($_GET['id'] === "") {
 			header('Location: items.php');
+			exit();
+		}
+		//initialize id
+		$id = $_GET['id'];
+
+		// make sure get id is a number
+		$validateNumber = new numberValidate;
+		if(!$validateNumber->isValid($id)) {
+			header('Location: items.php');
+			exit();	
 		}
 		// call update method and return template
 		$item = Item::getItem($_GET['id']);
+
+		// make sure item returned has value
+		if($item == NULL){
+			header('Location: items.php');
+			exit();
+		}
+
 		// set variables for template
-		$item_name = $item->name;
-		$price = $item->price;
-		$id = $item->id;
+		$item_name = $item['name'];
+		$price = $item['price'];
+		$id = $item['id'];
+
 		// Initialize template for updating item
 		$template = "
 		<form method=\"POST\" action=\"update_item.php?id=$id\">
@@ -31,7 +49,7 @@ require('Initialize/initialize.php');
 			<input type="text" name="price" value="">
 			<button>Add</button>
 		</form>';
-	}
+	}	
 
 
 ?>

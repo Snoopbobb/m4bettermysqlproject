@@ -18,5 +18,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		echo "<h3 style=\"color:red;\">$message</h3>";
 		exit();
 	}
-	new Item($_POST['name'], $_POST['price']);
+
+	// make sure item isn't empty
+	if(empty($_POST['name'])){
+		$message = "Item must not be empty.";
+		echo "<h3 style=\"color:red;\">$message</h3>";
+		exit();
+	}
+	
+	// put it in database
+	Item::create($_POST['name'], $_POST['price']);
 }
+header('Location: items.php');
+exit();

@@ -18,10 +18,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		echo "<h3 style=\"color: red;\">$message</h3>";
 		exit();
 	}
+
+	// make sure first name has value
+	if(empty($_POST['first_name'])) {
+	$message = "First name must not be blank.";
+	echo "<h3 style=\"color: red;\">$message</h3>";
+	exit();
+	}
 	//  Create new customer
 	Customer::create($_POST['first_name'], $_POST['last_name'], $_POST['email'], $_POST['gender']);
 	
 	// Redirect
 	header('Location: edit_customer.php?id=' . $customer_id);
+	exit();
+} else {
+	header('Location: customers.php');
 	exit();
 }

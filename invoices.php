@@ -6,8 +6,8 @@ require('Initialize/initialize.php');
 $results = Invoice::getAllInvoices(); 
 
 // Loop array to get each row
-$template = '';
-$total = "";
+$template = NULL;
+$total = NULL;
 foreach ($results as $row) {
 	$template .=
 		'<tr>
