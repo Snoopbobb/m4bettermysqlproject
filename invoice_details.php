@@ -1,4 +1,4 @@
-<?php 
+	<?php 
 // Initialize files
 require('Initialize/initialize.php');
 

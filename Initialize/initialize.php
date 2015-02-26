@@ -13,9 +13,9 @@ define('DB_NAME', 'posbetter');
 
 
 // Include validation files
-require_once('Initialize/validate.php');
-require_once('Initialize/email_validate.php');
-require_once('Initialize/number_validate.php');
+require_once('Initialize/Validate.php');
+require_once('Initialize/Email_Validate.php');
+require_once('Initialize/Number_Validate.php');
 
 // Include Common Files
 require_once('Initialize/DB.php');
